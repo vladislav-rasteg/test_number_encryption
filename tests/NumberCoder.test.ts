@@ -43,10 +43,5 @@ describe('NumberCoder', () => {
     expect(() => NumberCoder.encode(-1)).toThrow();
     const tooLarge = Math.pow(36, 6);
     expect(() => NumberCoder.encode(tooLarge)).toThrow();
-    console.log(NumberCoder.encode(0))
-    console.log(NumberCoder.encode(1))
-    console.log(NumberCoder.encode(135_487))
-    console.log(NumberCoder.encode(535_487))
-    console.log(NumberCoder.encode(Math.pow(36, 6) - 1))
   });
 });
