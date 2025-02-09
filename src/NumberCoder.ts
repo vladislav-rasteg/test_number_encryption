@@ -6,11 +6,13 @@ export class NumberCoder {
   
     /**
      * Кодирует число в 6-символьный код.
+     * Если передана соль, применяется сдвиг, зависящий от соли, для дополнительной обфускации.
      * @param num Число (целое, от 0 до MAX_VALUE).
+     * @param salt (необязательно) Строка-соль для обфускации.
      * @returns Код в виде строки длиной 6 символов.
      * @throws Error если входное значение не соответствует требованиям.
      */
-    public static encode(num: number): string {
+    public static encode(num: number, salt?: string): string {
       if (typeof num !== 'number' || !Number.isInteger(num)) {
         throw new Error('Входное значение должно быть целым числом.');
       }
@@ -18,8 +20,15 @@ export class NumberCoder {
         throw new Error(`Число должно быть в диапазоне от 0 до ${NumberCoder.MAX_VALUE}.`);
       }
   
-      // Преобразуем число в строку в 36-тиричной системе и переводим в верхний регистр
-      const encoded = num.toString(NumberCoder.BASE).toUpperCase();
+      let transformedNum = num;
+      if (salt !== undefined) {
+        const mod = NumberCoder.MAX_VALUE + 1;
+        const saltShift = NumberCoder.computeSalt(salt);
+        transformedNum = (num + saltShift) % mod;
+      }
+  
+      // Преобразуем число в строку в 36-тиричной системе счисления и переводим в верхний регистр
+      const encoded = transformedNum.toString(NumberCoder.BASE).toUpperCase();
   
       // Если длина меньше 6, дополняем ведущими нулями
       return encoded.padStart(NumberCoder.CODE_LENGTH, '0');
@@ -27,11 +36,13 @@ export class NumberCoder {
   
     /**
      * Декодирует 6-символьный код обратно в число.
+     * Если передана соль, производится обратный сдвиг для расшифровки.
      * @param code Строка длиной 6 символов, состоящая из цифр 0-9 и букв A-Z.
+     * @param salt (необязательно) Строка-соль для расшифровки.
      * @returns Исходное число.
      * @throws Error если входная строка не соответствует требованиям.
      */
-    public static decode(code: string): number {
+    public static decode(code: string, salt?: string): number {
       if (typeof code !== 'string') {
         throw new Error('Входное значение должно быть строкой.');
       }
@@ -46,7 +57,33 @@ export class NumberCoder {
       if (isNaN(num)) {
         throw new Error('Не удалось декодировать код.');
       }
-      return num;
+  
+      let originalNum = num;
+      if (salt !== undefined) {
+        const mod = NumberCoder.MAX_VALUE + 1;
+        const saltShift = NumberCoder.computeSalt(salt);
+        // Обратный сдвиг с учётом возможного отрицательного результата
+        originalNum = (num - saltShift) % mod;
+        if (originalNum < 0) {
+          originalNum += mod;
+        }
+      }
+      return originalNum;
+    }
+  
+    /**
+     * Вычисляет числовое значение соли на основе переданной строки.
+     * Используется простая хэш-функция, зависящая от символов строки.
+     * @param salt Соль.
+     * @returns Числовое значение соли.
+     */
+    private static computeSalt(salt: string): number {
+      const mod = NumberCoder.MAX_VALUE + 1;
+      let hash = 0;
+      for (let i = 0; i < salt.length; i++) {
+        hash = (hash * 31 + salt.charCodeAt(i)) % mod;
+      }
+      return hash;
     }
   }
   

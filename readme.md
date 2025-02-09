@@ -16,5 +16,6 @@
 NumberCoder.encode(0): "000000"  
 NumberCoder.encode(1): "000001"  
 NumberCoder.encode(135_487): "002WJJ"  
+NumberCoder.encode(135_487, "dkqwndj!2e2i2dqw@"): "TSL06B"  
 NumberCoder.encode(535_487): "00BH6N"  
 NumberCoder.encode(Math.pow(36, 6) - 1): "ZZZZZZ"  
